@@ -1,0 +1,1005 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "MoveOnLibra-API",
+        "description": "",
+        "termsOfService": "",
+        "contact": {
+            "email": "support@moveonLibra.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "Apache 2.0"
+        }
+    },
+    "host": "apitest.moveonLibra.com",
+    "schemes": [
+        "http"
+    ],
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"
+        }
+    },
+    "definitions": {
+        "SignedTransaction": {
+            "type": "object",
+            "properties": {
+                "raw_txn": {
+                    "$ref": "#/definitions/RawTransaction"
+                },
+                "public_key": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "signature": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "transaction_info": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "events": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "version": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "success": {
+                    "type": "integer",
+                    "format": "timestamp"
+                }
+            }
+        },
+        "AccountState": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "$ref": "#/definitions/Uint64"
+                }
+            }
+        },
+        "ContractEvent": {
+            "type": "object",
+            "properties": {
+                "from_proto": {},
+                "from_proto_event_with_proof": {},
+                "to_json_serializable": {},
+                "hash": {}
+            }
+        },
+        "Address": {
+            "type": "string",
+            "format": "hex64"
+        },
+        "Uint64": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+        },
+        "RawTransaction": {
+            "type": "object",
+            "properties": {
+                "sender": {
+                    "$ref": "#/definitions/Address"
+                },
+                "sequence_number": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "payload": {
+                    "$ref": "#/definitions/Address"
+                },
+                "max_gas_amount": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "gas_unit_price": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "expiration_time": {
+                    "type": "integer",
+                    "format": "timestamp"
+                }
+            }
+        },
+        "Wallet": {
+            "type": "object",
+            "properties": {
+                "wallet_id": {
+                    "$ref": "#/definitions/Uint64"
+                }
+            }
+        },
+        "Account": {
+            "type": "object",
+            "properties": {
+                "wallet_id": {
+                    "$ref": "#/definitions/Uint64"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "TRANSACTION"
+        },
+        {
+            "name": "ACCOUNT"
+        },
+        {
+            "name": "WALLET"
+        },
+        {
+            "name": "libra"
+        }
+    ],
+    "paths": {
+        "/v1/transactions/{id}": {
+            "get": {
+                "operationId": "transaction.get_transaction",
+                "summary": "Get a transaction by version id",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "required": true,
+                        "in": "path",
+                        "name": "id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/SignedTransaction"
+                        },
+                        "description": "SignedTransaction"
+                    }
+                }
+            }
+        },
+        "/v1/transactions": {
+            "get": {
+                "operationId": "transaction.get_transaction_batch",
+                "summary": "Get a list of transactions by start_version and limit",
+                "description": "Get a list of transactions by start_version and limit",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "start_version",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/SignedTransaction"
+                            }
+                        },
+                        "description": "List of SignedTransaction"
+                    }
+                }
+            }
+        },
+        "/v1/transactions/latest_version": {
+            "get": {
+                "operationId": "transaction.get_transaction_latest_version",
+                "summary": "Get the latest version number of transactions in Libra blockchain",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "latest_version"
+                        },
+                        "description": "Latest Version"
+                    }
+                }
+            }
+        },
+        "/v1/transactions/latest": {
+            "get": {
+                "operationId": "transaction.get_transaction_latest",
+                "summary": "Get a list of latest transactions, return <limit> number transactions",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/SignedTransaction"
+                            }
+                        },
+                        "description": "List of SignedTransaction"
+                    }
+                }
+            }
+        },
+        "/v1/transactions/acc_seq": {
+            "get": {
+                "operationId": "transaction.get_transaction_acc_seq",
+                "summary": "Get transaction by account_address and account sequence_number",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "sequence_number",
+                        "required": true,
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "account_address",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/SignedTransaction"
+                        },
+                        "description": "SignedTransaction"
+                    }
+                }
+            }
+        },
+        "/v1/transactions/mint": {
+            "post": {
+                "operationId": "transaction.post_transaction_mint",
+                "summary": "Mint micro-libra coins to an account.",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "number_of_micro_libra",
+                        "required": true,
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "receiver_account_address",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/SignedTransaction"
+                        },
+                        "description": "SignedTransaction"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/transactions/transfer": {
+            "post": {
+                "operationId": "transaction.post_transaction_transfer",
+                "summary": "Transfer micro-libra coins from sender account to receiver_account_address.",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TRANSACTION"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "number_of_micro_libra",
+                        "required": true,
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "receiver_account_address",
+                        "required": true,
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sender_account_address",
+                        "required": true,
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "wallet_id",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/SignedTransaction"
+                        },
+                        "description": "SignedTransaction"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/accounts/{address}": {
+            "get": {
+                "operationId": "account.get_account",
+                "summary": "get account state from address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/AccountState"
+                        },
+                        "description": "AccountState"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/balance/{address}": {
+            "get": {
+                "operationId": "account.get_account_balance",
+                "summary": "get account balance from address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "balance"
+                        },
+                        "description": "Balance"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/sequence_number/{address}": {
+            "get": {
+                "operationId": "account.get_account_sequence",
+                "summary": "get account sequence_number from address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "sequence_number"
+                        },
+                        "description": "sequence_number"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/sent/{address}": {
+            "get": {
+                "operationId": "account.get_account_events_sent",
+                "summary": "get events sent from this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "start_sequence_number",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/received/{address}": {
+            "get": {
+                "operationId": "account.get_account_events_received",
+                "summary": "get events received from this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "start_sequence_number",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/latest/sent/{address}": {
+            "get": {
+                "operationId": "account.get_account_events_latest_sent",
+                "summary": "get latest events sent from this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/latest/received/{address}": {
+            "get": {
+                "operationId": "account.get_account_events_latest_received",
+                "summary": "get latest events received from this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/{address}": {
+            "get": {
+                "operationId": "account.get_account_events",
+                "summary": "get events both sent and received of this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "start_sequence_number",
+                        "required": true,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/events/latest/{address}": {
+            "get": {
+                "operationId": "account.get_account_events_latest",
+                "summary": "get latest events both sent and received of this account by address",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ACCOUNT"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "name": "limit",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/ContractEvent"
+                            }
+                        },
+                        "description": "List of Events"
+                    }
+                }
+            }
+        },
+        "/v1/wallets": {
+            "get": {
+                "operationId": "wallet.get_wallets",
+                "summary": "get all wallets managed by the app",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WALLET"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "appid",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {}
+                        },
+                        "description": "List of Wallets"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "wallet.create_wallet",
+                "summary": "create a wallet by the app",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WALLET"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "required": false,
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "appid",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {},
+                        "description": "Wallet"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/wallets/{wallet_id}": {
+            "get": {
+                "operationId": "wallet.get_wallet",
+                "summary": "get a wallet by the app",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WALLET"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "wallet_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "appid",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {},
+                        "description": "Wallet"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/wallets/{wallet_id}/accounts": {
+            "get": {
+                "operationId": "wallet.get_wallet_accounts",
+                "summary": "get a wallet by the app",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WALLET"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "wallet_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "appid",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {},
+                        "description": "Account"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "wallet.create_accounts",
+                "summary": "create an account in wallet by the app",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WALLET"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "wallet_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "appid",
+                        "required": false,
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "array",
+                            "items": {}
+                        },
+                        "description": "List of Account"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    }
+}
