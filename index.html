@@ -94,6 +94,20 @@
   </rapi-doc>
 
 
+  <div class="container" style="display:none" id="pdf">
+    <div class="row">
+      <div class="col-lg-12">
+        <br/><br/>
+        <div class="text-center">
+            Please click this link to view the pdf version of the <a href="./MoveOnLibra_API.pdf">MoveOnLibra OpenAPI Document</a>
+        </div>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+      </div>
+    </div>
+  </div>
+
+
+
   <footer id="contact" class="gradient_bg">
     <div class="footer-bottom slim">
       <div class="container">
@@ -106,6 +120,18 @@
       </div>
     </div>
   </footer>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    var supportsCustomElements = ('customElements' in window);
+    if(!supportsCustomElements){
+      $("#pdf").show()
+    }
+    if ( console && console.log ) {
+        console.log( "document ready." );
+      }
+  });
+</script>
 
 </body>
 
