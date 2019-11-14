@@ -10,10 +10,9 @@
         },
         "license": {
             "name": "MIT",
-            "url": "Apache 2.0"
+            "url": "LICENSE"
         }
     },
-    "host": "apitest.moveonLibra.com",
     "schemes": [
         "http"
     ],
@@ -38,24 +37,67 @@
                     "$ref": "#/definitions/Uint64"
                 },
                 "transaction_info": {
-                    "$ref": "#/definitions/Uint64"
+                    "$ref": "#/definitions/TransactionInfo"
                 },
                 "events": {
-                    "$ref": "#/definitions/Uint64"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ContractEvent"
+                    }
                 },
                 "version": {
                     "$ref": "#/definitions/Uint64"
                 },
                 "success": {
-                    "type": "integer",
-                    "format": "timestamp"
+                    "type": "boolean"
                 }
             }
         },
         "AccountState": {
             "type": "object",
             "properties": {
+                "ordered_map": {
+                    "type": "object"
+                },
+                "account_resource_path": {
+                    "type": "string",
+                    "format": "hex"
+                },
+                "decoded_account_resource": {
+                    "$ref": "#/definitions/AccountResource"
+                },
+                "rotate_key": {
+                    "type": "boolean",
+                    "description": "Has this account rotated it's private/public key?"
+                },
+                "address": {
+                    "$ref": "#/definitions/Address"
+                }
+            }
+        },
+        "AccountResource": {
+            "type": "object",
+            "properties": {
+                "authentication_key": {
+                    "type": "string",
+                    "format": "hex"
+                },
                 "balance": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "delegated_key_rotation_capability": {
+                    "type": "boolean"
+                },
+                "delegated_withdrawal_capability": {
+                    "type": "boolean"
+                },
+                "received_events": {
+                    "$ref": "#/definitions/EventHandle"
+                },
+                "sent_events": {
+                    "$ref": "#/definitions/EventHandle"
+                },
+                "sequence_number": {
                     "$ref": "#/definitions/Uint64"
                 }
             }
@@ -63,10 +105,68 @@
         "ContractEvent": {
             "type": "object",
             "properties": {
-                "from_proto": {},
-                "from_proto_event_with_proof": {},
-                "to_json_serializable": {},
-                "hash": {}
+                "key": {
+                    "type": "string",
+                    "format": "hex64"
+                },
+                "event_seq_num": {
+                    "$ref": "#/definitions/Uint64",
+                    "description": "Sequnece number in a given event handle"
+                },
+                "event_data": {
+                    "type": "string",
+                    "format": "hex"
+                }
+            }
+        },
+        "Wallet": {
+            "type": "object",
+            "description": "Wallet belongs to a user, used in an App",
+            "properties": {
+                "wallet_id": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "child_count": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "appid": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "network": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer",
+                    "format": "timestamp"
+                }
+            }
+        },
+        "Account": {
+            "type": "object",
+            "description": "Libra account managed by wallet",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/Address"
+                },
+                "appid": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "wallet_id": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "child_id": {
+                    "$ref": "#/definitions/Uint64"
+                },
+                "network": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer",
+                    "format": "timestamp"
+                }
             }
         },
         "Address": {
@@ -75,8 +175,93 @@
         },
         "Uint64": {
             "type": "integer",
-            "format": "int64",
+            "format": "Uint64",
             "minimum": 0
+        },
+        "TransactionInfo": {
+            "type": "object",
+            "properties": {
+                "transaction_hash": {
+                    "type": "string",
+                    "format": "hex64"
+                },
+                "state_root_hash": {
+                    "type": "string",
+                    "format": "hex64"
+                },
+                "event_root_hash": {
+                    "type": "string",
+                    "format": "hex64"
+                },
+                "gas_used": {
+                    "type": "integer"
+                },
+                "major_status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Script": {
+            "type": "object",
+            "description": "Script",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "format": "hex"
+                },
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "Enum of (U64, Address, String, ByteArray)",
+                        "properties": {
+                            "U64": {
+                                "$ref": "#/definitions/Uint64"
+                            },
+                            "Address": {
+                                "$ref": "#/definitions/Address"
+                            },
+                            "String": {
+                                "type": "string"
+                            },
+                            "ByteArray": {
+                                "type": "string",
+                                "format": "hex"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Module": {
+            "type": "object",
+            "description": "Module",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "format": "hex"
+                }
+            }
+        },
+        "WriteSet": {
+            "type": "object",
+            "description": "WriteSet",
+            "properties": {}
+        },
+        "Payload": {
+            "type": "object",
+            "description": "Enum of (Script, Module, WriteSet)",
+            "properties": {
+                "Script": {
+                    "$ref": "#/definitions/Script"
+                },
+                "Module": {
+                    "$ref": "#/definitions/Module"
+                },
+                "WriteSet": {
+                    "$ref": "#/definitions/WriteSet"
+                }
+            }
         },
         "RawTransaction": {
             "type": "object",
@@ -88,7 +273,7 @@
                     "$ref": "#/definitions/Uint64"
                 },
                 "payload": {
-                    "$ref": "#/definitions/Address"
+                    "$ref": "#/definitions/Payload"
                 },
                 "max_gas_amount": {
                     "$ref": "#/definitions/Uint64"
@@ -102,19 +287,27 @@
                 }
             }
         },
-        "Wallet": {
+        "EventHandle": {
             "type": "object",
             "properties": {
-                "wallet_id": {
-                    "$ref": "#/definitions/Uint64"
+                "count": {
+                    "type": "integer",
+                    "format": "Uint64",
+                    "description": "Number of events in the event stream."
+                },
+                "key": {
+                    "type": "string",
+                    "description": "The associated globally unique key that is used as the key to the EventStore",
+                    "format": "hex"
                 }
             }
         },
-        "Account": {
+        "Error": {
             "type": "object",
+            "description": "Human-readable error message.",
             "properties": {
-                "wallet_id": {
-                    "$ref": "#/definitions/Uint64"
+                "error": {
+                    "type": "string"
                 }
             }
         }
@@ -124,7 +317,10 @@
             "name": "TRANSACTION"
         },
         {
-            "name": "ACCOUNT"
+            "name": "ADDRESS"
+        },
+        {
+            "name": "EVENT"
         },
         {
             "name": "WALLET"
@@ -134,7 +330,7 @@
         }
     ],
     "paths": {
-        "/v1/transactions/{id}": {
+        "/v1/transactions/{version}": {
             "get": {
                 "operationId": "transaction.get_transaction",
                 "summary": "Get a transaction by version id",
@@ -154,7 +350,7 @@
                         "format": "int64",
                         "required": true,
                         "in": "path",
-                        "name": "id"
+                        "name": "version"
                     }
                 ],
                 "responses": {
@@ -164,6 +360,30 @@
                             "$ref": "#/definitions/SignedTransaction"
                         },
                         "description": "SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Given address not exists on Libra blockchain."
                     }
                 }
             }
@@ -189,7 +409,8 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     },
                     {
                         "type": "integer",
@@ -209,6 +430,24 @@
                             }
                         },
                         "description": "List of SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
@@ -236,6 +475,24 @@
                             "description": "latest_version"
                         },
                         "description": "Latest Version"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
@@ -260,7 +517,8 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     }
                 ],
                 "responses": {
@@ -273,6 +531,24 @@
                             }
                         },
                         "description": "List of SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
@@ -313,6 +589,24 @@
                             "$ref": "#/definitions/SignedTransaction"
                         },
                         "description": "SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
@@ -353,6 +647,30 @@
                             "$ref": "#/definitions/SignedTransaction"
                         },
                         "description": "SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 },
                 "security": [
@@ -411,6 +729,30 @@
                             "$ref": "#/definitions/SignedTransaction"
                         },
                         "description": "SignedTransaction"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 },
                 "security": [
@@ -420,10 +762,10 @@
                 ]
             }
         },
-        "/v1/accounts/{address}": {
+        "/v1/address/{address}": {
             "get": {
-                "operationId": "account.get_account",
-                "summary": "get account state from address",
+                "operationId": "address.get_account",
+                "summary": "get account state from address. Also automatically decode account resource of this address. BTW, an address can have many other resources.",
                 "consumes": [
                     "application/x-www-form-urlencoded",
                     "application/json"
@@ -432,7 +774,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "ADDRESS"
                 ],
                 "parameters": [
                     {
@@ -449,13 +791,94 @@
                             "$ref": "#/definitions/AccountState"
                         },
                         "description": "AccountState"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Given address not exists on Libra blockchain."
                     }
                 }
             }
         },
-        "/v1/accounts/balance/{address}": {
+        "/v1/address/account_resource/{address}": {
             "get": {
-                "operationId": "account.get_account_balance",
+                "operationId": "address.get_account_resource",
+                "summary": "get account resource from address.",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ADDRESS"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "required": true,
+                        "in": "path",
+                        "name": "address"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/AccountResource"
+                        },
+                        "description": "AccountResource"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Given address not exists on Libra blockchain."
+                    }
+                }
+            }
+        },
+        "/v1/address/balance/{address}": {
+            "get": {
+                "operationId": "address.get_account_balance",
                 "summary": "get account balance from address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -465,7 +888,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "ADDRESS"
                 ],
                 "parameters": [
                     {
@@ -483,13 +906,37 @@
                             "description": "balance"
                         },
                         "description": "Balance"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Given address not exists on Libra blockchain."
                     }
                 }
             }
         },
-        "/v1/accounts/sequence_number/{address}": {
+        "/v1/address/sequence_number/{address}": {
             "get": {
-                "operationId": "account.get_account_sequence",
+                "operationId": "address.get_account_sequence",
                 "summary": "get account sequence_number from address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -499,7 +946,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "ADDRESS"
                 ],
                 "parameters": [
                     {
@@ -517,13 +964,37 @@
                             "description": "sequence_number"
                         },
                         "description": "sequence_number"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "404": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Given address not exists on Libra blockchain."
                     }
                 }
             }
         },
-        "/v1/accounts/events/sent/{address}": {
+        "/v1/events/sent/{address}": {
             "get": {
-                "operationId": "account.get_account_events_sent",
+                "operationId": "event.get_account_events_sent",
                 "summary": "get events sent from this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -533,7 +1004,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -547,12 +1018,13 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     },
                     {
                         "type": "integer",
                         "format": "int64",
-                        "name": "start_sequence_number",
+                        "name": "start_event_seq_number",
                         "required": true,
                         "in": "query"
                     }
@@ -567,13 +1039,31 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
         },
-        "/v1/accounts/events/received/{address}": {
+        "/v1/events/received/{address}": {
             "get": {
-                "operationId": "account.get_account_events_received",
+                "operationId": "event.get_account_events_received",
                 "summary": "get events received from this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -583,7 +1073,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -597,12 +1087,13 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     },
                     {
                         "type": "integer",
                         "format": "int64",
-                        "name": "start_sequence_number",
+                        "name": "start_event_seq_number",
                         "required": true,
                         "in": "query"
                     }
@@ -617,13 +1108,31 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
         },
-        "/v1/accounts/events/latest/sent/{address}": {
+        "/v1/events/latest/sent/{address}": {
             "get": {
-                "operationId": "account.get_account_events_latest_sent",
+                "operationId": "event.get_account_events_latest_sent",
                 "summary": "get latest events sent from this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -633,7 +1142,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -647,7 +1156,8 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     }
                 ],
                 "responses": {
@@ -660,13 +1170,31 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
         },
-        "/v1/accounts/events/latest/received/{address}": {
+        "/v1/events/latest/received/{address}": {
             "get": {
-                "operationId": "account.get_account_events_latest_received",
+                "operationId": "event.get_account_events_latest_received",
                 "summary": "get latest events received from this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -676,7 +1204,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -690,7 +1218,8 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     }
                 ],
                 "responses": {
@@ -703,13 +1232,31 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
         },
-        "/v1/accounts/events/{address}": {
+        "/v1/events/{address}": {
             "get": {
-                "operationId": "account.get_account_events",
+                "operationId": "event.get_account_events",
                 "summary": "get events both sent and received of this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -719,7 +1266,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -733,12 +1280,13 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     },
                     {
                         "type": "integer",
                         "format": "int64",
-                        "name": "start_sequence_number",
+                        "name": "start_event_seq_number",
                         "required": true,
                         "in": "query"
                     }
@@ -753,13 +1301,31 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
         },
-        "/v1/accounts/events/latest/{address}": {
+        "/v1/events/latest/{address}": {
             "get": {
-                "operationId": "account.get_account_events_latest",
+                "operationId": "event.get_account_events_latest",
                 "summary": "get latest events both sent and received of this account by address",
                 "consumes": [
                     "application/x-www-form-urlencoded",
@@ -769,7 +1335,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "ACCOUNT"
+                    "EVENT"
                 ],
                 "parameters": [
                     {
@@ -783,7 +1349,8 @@
                         "format": "int64",
                         "name": "limit",
                         "required": false,
-                        "in": "query"
+                        "in": "query",
+                        "default": 1
                     }
                 ],
                 "responses": {
@@ -796,6 +1363,24 @@
                             }
                         },
                         "description": "List of Events"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 }
             }
@@ -818,7 +1403,7 @@
                     {
                         "type": "string",
                         "name": "appid",
-                        "required": false,
+                        "required": true,
                         "in": "query"
                     }
                 ],
@@ -826,9 +1411,36 @@
                     "200": {
                         "schema": {
                             "type": "array",
-                            "items": {}
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/Wallet"
+                            }
                         },
                         "description": "List of Wallets"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
                     }
                 },
                 "security": [
@@ -860,14 +1472,41 @@
                     {
                         "type": "string",
                         "name": "appid",
-                        "required": false,
+                        "required": true,
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "schema": {},
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Wallet"
+                        },
                         "description": "Wallet"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 },
                 "security": [
@@ -901,14 +1540,41 @@
                     {
                         "type": "string",
                         "name": "appid",
-                        "required": false,
+                        "required": true,
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "schema": {},
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Wallet"
+                        },
                         "description": "Wallet"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
                     }
                 },
                 "security": [
@@ -921,7 +1587,7 @@
         "/v1/wallets/{wallet_id}/accounts": {
             "get": {
                 "operationId": "wallet.get_wallet_accounts",
-                "summary": "get a wallet by the app",
+                "summary": "get accounts of a wallet by the app",
                 "consumes": [
                     "application/x-www-form-urlencoded",
                     "application/json"
@@ -942,14 +1608,41 @@
                     {
                         "type": "string",
                         "name": "appid",
-                        "required": false,
+                        "required": true,
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "schema": {},
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Account"
+                        },
                         "description": "Account"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
                     }
                 },
                 "security": [
@@ -981,7 +1674,7 @@
                     {
                         "type": "string",
                         "name": "appid",
-                        "required": false,
+                        "required": true,
                         "in": "query"
                     }
                 ],
@@ -989,9 +1682,36 @@
                     "200": {
                         "schema": {
                             "type": "array",
-                            "items": {}
+                            "items": {
+                                "type": "object",
+                                "$ref": "#/definitions/Account"
+                            }
                         },
                         "description": "List of Account"
+                    },
+                    "400": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Bad Request. Probably an ill-formed request. See `error` message for details."
+                    },
+                    "401": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Unauthorized. Probably an empty or invalid `Authorization` header sent."
+                    },
+                    "429": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Too many requests. You have either reached the API usage limit allowed to your user and subscription types or the maximum request allowed per client and second."
+                    },
+                    "500": {
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        },
+                        "description": "Internal server error. An unexpected error happened at the server side when trying to fulfil your request."
                     }
                 },
                 "security": [
@@ -1001,5 +1721,6 @@
                 ]
             }
         }
-    }
+    },
+    "host": "apitest.moveonLibra.com"
 }
